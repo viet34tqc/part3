@@ -2,8 +2,12 @@ const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
 const morgan = require("morgan");
+const cors = require("cors");
 
 app.use(bodyParser.json());
+app.use(cors());
+app.use(express.static("build"));
+
 morgan.token("body", function(req, res) {
   return JSON.stringify(req.body);
 });
@@ -13,10 +17,10 @@ app.use(
 );
 
 let phonebooks = [
-  { name: "Arto Hellas", number: "040-123456", id: 1 },
-  { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
-  { name: "Dan Abramov", number: "12-43-234345", id: 3 },
-  { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 }
+  { name: "Arto Hellas", phone: "040-123456", id: 1 },
+  { name: "Ada Lovelace", phone: "39-44-5323523", id: 2 },
+  { name: "Dan Abramov", phone: "12-43-234345", id: 3 },
+  { name: "Mary Poppendieck", phone: "39-23-6423122", id: 4 }
 ];
 
 app.get("/api/persons", (req, res) => {
@@ -63,7 +67,7 @@ app.post("/api/persons", (req, res) => {
   let error = "";
   if (!body.name) {
     error = "Name missing";
-  } else if (!body.number) {
+  } else if (!body.phone) {
     error = "Phone missing";
   } else if (isDuplicate(body.name)) {
     error = "name must be unique";
@@ -76,13 +80,13 @@ app.post("/api/persons", (req, res) => {
   }
   const contact = {
     name: body.name,
-    number: body.number,
+    phone: body.phone,
     id: getRand(100)
   };
   phonebooks = phonebooks.concat(contact);
 
-  res.json(phonebooks);
+  res.json(contact);
 });
 
-const port = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(port);
