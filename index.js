@@ -1,88 +1,85 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const morgan = require("morgan");
+const cors = require("cors");
 
+app.use(cors());
 app.use(bodyParser.json());
-morgan.token("body", function(req, res) {
-  return JSON.stringify(req.body);
-});
+app.use(express.static('build'))
 
-app.use(
-  morgan(":method :url :status :res[content-length] - :response-time ms :body")
-);
-
-let phonebooks = [
-  { name: "Arto Hellas", number: "040-123456", id: 1 },
-  { name: "Ada Lovelace", number: "39-44-5323523", id: 2 },
-  { name: "Dan Abramov", number: "12-43-234345", id: 3 },
-  { name: "Mary Poppendieck", number: "39-23-6423122", id: 4 }
+let notes = [
+  {
+    id: 1,
+    content: "HTML is easy",
+    date: "2019-05-30T17:30:31.098Z",
+    important: true
+  },
+  {
+    id: 2,
+    content: "Browser can execute only Javascript",
+    date: "2019-05-30T18:39:34.091Z",
+    important: false
+  },
+  {
+    id: 3,
+    content: "GET and POST are the most important methods of HTTP protocols",
+    date: "2019-05-30T19:20:14.298Z",
+    important: true
+  }
 ];
 
-app.get("/api/persons", (req, res) => {
-  res.json(phonebooks);
+app.get("/api", (req, res) => {
+  res.send("<h1>Hello world</h1>");
 });
 
-app.get("/api/persons/:id", (req, res) => {
+app.get("/api/notes", (req, res) => {
+  res.json(notes);
+});
+
+app.get("/api/notes/:id", (req, res) => {
   const id = Number(req.params.id);
-  const contact = phonebooks.find(contact => contact.id === id);
-  if (contact) {
-    res.json(contact);
+  const note = notes.find(note => note.id === id);
+  if (note) {
+    res.json(note);
   } else {
     res.status(404).end();
   }
 });
 
-app.delete("/api/persons/:id", (req, res) => {
+app.delete("/api/notes/:id", (req, res) => {
   const id = Number(req.params.id);
-  phonebooks = phonebooks.filter(contact => contact.id !== id);
+  notes = notes.filter(note => note.id !== id);
 
   res.status(204).end();
 });
 
-app.get("/info", (req, res) => {
-  const message = `
-    Phonebook has info of ${phonebooks.length} people
-    ${new Date()}
-  `;
-  res.send(message);
-});
-
-const getRand = max => {
-  return Math.floor(Math.random() * Math.floor(max));
-};
-
-const isDuplicate = name => {
-  return phonebooks.some(contact => {
-    return contact.name.indexOf(name) !== -1;
-  });
-};
-
-app.post("/api/persons", (req, res) => {
+app.post("/api/notes", (req, res) => {
   const body = req.body;
-  let error = "";
-  if (!body.name) {
-    error = "Name missing";
-  } else if (!body.number) {
-    error = "Phone missing";
-  } else if (isDuplicate(body.name)) {
-    error = "name must be unique";
-  }
 
-  if (error) {
+  if (!body.content) {
     return res.status(400).json({
-      error
+      error: "content missing"
     });
   }
-  const contact = {
-    name: body.name,
-    number: body.number,
-    id: getRand(100)
-  };
-  phonebooks = phonebooks.concat(contact);
 
-  res.json(phonebooks);
+  const note = {
+    content: body.content,
+    important: body.important || false,
+    date: new Date(),
+    id: generateId()
+  };
+
+  notes = notes.concat(note);
+
+  res.json(note);
 });
 
-const port = 3001;
-app.listen(port);
+const generateId = () => {
+  const maxId = notes.length > 0 ? Math.max(...notes.map(n => n.id)) : 0;
+  return maxId + 1;
+};
+
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
