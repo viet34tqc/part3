@@ -74,10 +74,6 @@ app.post("/api/notes", (req, res) => {
   note.save().then(savedNote => {
     res.json(savedNote.toJSON());
   });
-
-  notes = notes.concat(note);
-
-  res.json(note);
 });
 
 const PORT = process.env.PORT;
