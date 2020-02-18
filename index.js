@@ -43,10 +43,16 @@ app.get("/api/notes", (req, res) => {
   });
 });
 
-app.get("/api/notes/:id", (req, res) => {
-  Note.findById(req.params.id).then(note => {
-    response.json(note.toJSON());
-  });
+app.get("/api/notes/:id", (req, res, next) => {
+  Note.findById(req.params.id)
+    .then(note => {
+      if (note) {
+        res.json(note.toJSON());
+      } else {
+        res.status(404).end();
+      }
+    })
+    .catch(error => next(error));
 });
 
 app.delete("/api/notes/:id", (req, res) => {
@@ -76,6 +82,22 @@ app.post("/api/notes", (req, res) => {
   });
 });
 
+const unknownEndpoint = (req, res) => {
+  res.status(400).send({ error: "unknown endpoint" });
+};
+
+app.use(unknownEndpoint);
+
+const errorHandler = (error, req, res, next) => {
+  console.log(error.message);
+
+  if (error.name === "CastError" && error.kind === "ObjectId") {
+    return res.status(400).send({ error: "malformated id" });
+  }
+
+  next(error);
+};
+app.use(errorHandler);
 const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
