@@ -1,7 +1,11 @@
 // Lấy giá trị biến từ file .env
-require('dotenv').config()
+require("dotenv").config();
 
 const mongoose = require("mongoose");
+
+// Thêm dòng này để fix lỗi
+// DeprecationWarning: collection.findAndModify is deprecated...
+mongoose.set("useFindAndModify", false);
 
 const url = process.env.MONGODB_URI;
 
