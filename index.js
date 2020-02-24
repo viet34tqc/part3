@@ -43,14 +43,8 @@ app.delete("/api/notes/:id", (req, res, next) => {
 });
 
 // Tạo note
-app.post("/api/notes", (req, res) => {
+app.post("/api/notes", (req, res, next) => {
   const body = req.body;
-
-  if (body.content === undefined) {
-    return res.status(400).json({
-      error: "content missing"
-    });
-  }
 
   const note = new Note({
     content: body.content,
@@ -58,9 +52,13 @@ app.post("/api/notes", (req, res) => {
     date: new Date()
   });
 
-  note.save().then(savedNote => {
-    res.json(savedNote.toJSON());
-  });
+  note
+    .save()
+    .then(savedNote => savedNote.toJSON())
+    .then(savedAndFormattedNote => {
+      res.json(savedAndFormattedNote);
+    })
+    .catch(error => next(error));
 });
 
 // Update note
@@ -93,6 +91,8 @@ const errorHandler = (error, req, res, next) => {
 
   if (error.name === "CastError" && error.kind === "ObjectId") {
     return res.status(400).send({ error: "malformated id" });
+  } else if (error.name === "ValidationError") {
+    return res.status(400).send({ error: error.message });
   }
 
   next(error);
