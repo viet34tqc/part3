@@ -1,28 +1,29 @@
 // Lấy giá trị biến từ file .env
-require("dotenv").config();
+require('dotenv').config();
 
-const express = require("express");
+const express = require('express');
+
 const app = express();
-const bodyParser = require("body-parser");
-const cors = require("cors");
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use(express.static("build"));
+app.use(express.static('build'));
 
-const Note = require("./models/note");
+const Note = require('./models/note');
 
-app.get("/api", (req, res) => {
-  res.send("<h1>Hello world</h1>");
+app.get('/api', (req, res) => {
+  res.send('<h1>Hello world</h1>');
 });
 
-app.get("/api/notes", (req, res) => {
+app.get('/api/notes', (req, res) => {
   Note.find({}).then(notes => {
     res.json(notes.map(note => note.toJSON()));
   });
 });
 
-app.get("/api/notes/:id", (req, res, next) => {
+app.get('/api/notes/:id', (req, res, next) => {
   Note.findById(req.params.id)
     .then(note => {
       if (note) {
@@ -34,7 +35,7 @@ app.get("/api/notes/:id", (req, res, next) => {
     .catch(error => next(error));
 });
 
-app.delete("/api/notes/:id", (req, res, next) => {
+app.delete('/api/notes/:id', (req, res, next) => {
   Note.findByIdAndDelete(req.params.id)
     .then(note => {
       res.status(200).end();
@@ -43,13 +44,13 @@ app.delete("/api/notes/:id", (req, res, next) => {
 });
 
 // Tạo note
-app.post("/api/notes", (req, res, next) => {
-  const body = req.body;
+app.post('/api/notes', (req, res, next) => {
+  const { body } = req;
 
   const note = new Note({
     content: body.content,
     important: body.important || false,
-    date: new Date()
+    date: new Date(),
   });
 
   note
@@ -62,12 +63,12 @@ app.post("/api/notes", (req, res, next) => {
 });
 
 // Update note
-app.put("/api/notes/:id", (req, res, next) => {
-  const body = req.body;
+app.put('/api/notes/:id', (req, res, next) => {
+  const { body } = req;
 
   const note = {
     content: body.content,
-    important: body.important
+    important: body.important,
   };
   console.log(body);
 
@@ -81,7 +82,7 @@ app.put("/api/notes/:id", (req, res, next) => {
 });
 
 const unknownEndpoint = (req, res) => {
-  res.status(400).send({ error: "unknown endpoint" });
+  res.status(400).send({ error: 'unknown endpoint' });
 };
 
 app.use(unknownEndpoint);
@@ -89,16 +90,17 @@ app.use(unknownEndpoint);
 const errorHandler = (error, req, res, next) => {
   console.log(error.message);
 
-  if (error.name === "CastError" && error.kind === "ObjectId") {
-    return res.status(400).send({ error: "malformated id" });
-  } else if (error.name === "ValidationError") {
+  if (error.name === 'CastError' && error.kind === 'ObjectId') {
+    return res.status(400).send({ error: 'malformated id' });
+  }
+  if (error.name === 'ValidationError') {
     return res.status(400).send({ error: error.message });
   }
 
   next(error);
 };
 app.use(errorHandler);
-const PORT = process.env.PORT;
+const { PORT } = process.env;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

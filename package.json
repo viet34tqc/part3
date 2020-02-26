@@ -10,7 +10,8 @@
     "build:ui": "rm -rf build && cd ../part1 && npm run build --prod && cp -r build ../part3",
     "deploy": "git push heroku part3-2:master",
     "deploy:full": "npm run build:ui && git add . && git commit -m uibuild && npm run deploy",
-    "logs:prod": "heroku logs --tail"
+    "logs:prod": "heroku logs --tail",
+    "lint": "eslint ."
   },
   "author": "",
   "license": "ISC",
@@ -21,6 +22,16 @@
     "mongoose": "^5.8.10"
   },
   "devDependencies": {
-    "nodemon": "^2.0.2"
+    "babel-eslint": "^10.1.0",
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb": "^18.0.1",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-import": "^2.20.1",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.18.3",
+    "nodemon": "^2.0.2",
+    "prettier": "^1.19.1"
   }
 }
