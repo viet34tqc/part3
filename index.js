@@ -81,28 +81,17 @@ const isDuplicate = name => {
 
 app.post("/api/persons", (req, res, next) => {
   const body = req.body;
-  let error = "";
-  if (!body.name) {
-    error = "Name missing";
-  } else if (!body.phone) {
-    error = "Phone missing";
-  } /* else if (isDuplicate(body.name)) {
-    error = "name must be unique";
-  } */
 
-  if (error) {
-    // Cái này là trả về user nên dùng hàm json();
-    return res.status(400).json({
-      error
-    });
-  }
   const person = new Person({
     name: body.name,
     phone: body.phone
   });
-  person.save().then(savedPerson => {
-    res.json(savedPerson.toJSON());
-  });
+  person
+    .save()
+    .then(savedPerson => {
+      res.json(savedPerson.toJSON());
+    })
+    .catch(error => next(error));
 });
 
 const unknownEndpoint = (req, res) => {
@@ -117,6 +106,8 @@ const errorHandler = (error, req, res, next) => {
   // CastError is invalid object id.
   if (error.name === "CastError" && error.kind === "ObjectId") {
     return res.status(400).send({ error: "malformatted id" });
+  } else if (error.name === "ValidationError") {
+    return res.status(400).send({ error: error.message });
   }
 
   next(error);
