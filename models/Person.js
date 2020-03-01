@@ -1,21 +1,6 @@
-// Require file .env để lấy thông số
-require("dotenv").config();
-
 // Require mongoose.
 const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
-
-const url = process.env.MONGODB_URI;
-
-// Connect database.
-mongoose
-  .connect(url, { useNewUrlParser: true })
-  .then(result => {
-    console.log("connected to MongoDB");
-  })
-  .catch(error => {
-    console.log("error connecting MongoDB: ", error.message);
-  });
 
 // tạo schema.
 const phonebookSchema = new mongoose.Schema({
