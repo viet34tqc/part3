@@ -12,11 +12,15 @@ const noteSchema = new mongoose.Schema({
   },
   date: {
     type: Date,
-    required: true,
   },
   important: Boolean,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+  },
 });
 
+// Convert note document sang dạng JSON
 // Xóa field _id và __v( version ) của mongo và thêm trường id dạng string vào object
 noteSchema.set('toJSON', {
   transform: (document, returnedObject) => {
